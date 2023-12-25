@@ -1,121 +1,55 @@
+"use client";
 import PostList from "@/app/components/PostList";
+import Modal from "@/app/components/modal";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-async function getPost() {
-  const res = await fetch("http://localhost:3000/api/posts");
-  if (!res.ok) {
-    throw new Error("failed");
-  }
+const DashboardPage = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [post, setPost] = useState(null);
+  const [inputSearch, setInputSearch] = useState("");
 
-  return res.json();
-}
-const DashboardPage = async () => {
-  const post = await getPost();
+  const [isLoading, setLoading] = useState(true);
+  const {
+    register,
+    setError,
+    formState: { errors },
+    handleSubmit,
+  } = useForm();
+  const onSubmit = handleSubmit(async (credentials: any) => {
+    axios
+      .post("/api/posts", credentials)
+      .then((res) => {
+        console.log(res);
+        fetchPost();
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+      .finally(() => {
+        setModalOpen(false);
+      });
+  });
+  const fetchSearch = () => {
+    console.log(inputSearch);
+  };
+  const fetchPost = async () => {
+    fetch("http://localhost:3000/api/posts")
+      .then((res) => res.json())
+      .then((data) => {
+        setPost(data);
+        setLoading(false);
+      });
+  };
+  useEffect(() => {
+    fetchPost();
+  }, []);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (!post) return <p>No post</p>;
   return (
     <>
-      {/* <div className="mx-auto max-w-screen-xl px-4 lg:px-12">
-        <form action="#">
-          <div className="grid gap-4 mb-4 sm:grid-cols-2">
-            <div>
-              <label
-                htmlFor="name"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                placeholder="Type product name"
-                required={false}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="brand"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Brand
-              </label>
-              <input
-                type="text"
-                name="brand"
-                id="brand"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                placeholder="Product brand"
-                required={false}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="price"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Price
-              </label>
-              <input
-                type="number"
-                name="price"
-                id="price"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                placeholder="$2999"
-                required={false}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="category"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Category
-              </label>
-              <select
-                id="category"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-              >
-                <option selected={false}>Select category</option>
-                <option value="TV">TV/Monitors</option>
-                <option value="PC">PC</option>
-                <option value="GA">Gaming/Console</option>
-                <option value="PH">Phones</option>
-              </select>
-            </div>
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="description"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                rows={4}
-                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                placeholder="Write product description here"
-              ></textarea>
-            </div>
-          </div>
-          <button
-            type="submit"
-            className="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-          >
-            <svg
-              className="mr-1 -ml-1 w-6 h-6"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            Add new product
-          </button>
-        </form>
-      </div> */}
       <section className="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 antialiased my-10">
         <div className="mx-auto max-w-screen-xl px-4 lg:px-12">
           <div className="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
@@ -147,12 +81,19 @@ const DashboardPage = async () => {
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                       placeholder="Search"
                       required={false}
+                      onChange={(e) => {
+                        setInputSearch(e.target.value);
+                      }}
                     />
                   </div>
                 </form>
+                <button type="button" onClick={() => fetchSearch()}>
+                  Search
+                </button>
               </div>
               <div className="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
                 <button
+                  onClick={() => setModalOpen(true)}
                   type="button"
                   id="createProductModalButton"
                   data-modal-target="createProductModal"
@@ -549,22 +490,17 @@ const DashboardPage = async () => {
           </div>
         </div>
       </section>
-      {/* <div
-        id="createProductModal"
-        aria-hidden="true"
-        className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-      >
+      <Modal modalOpen={modalOpen} setModalOpen={setModalOpen}>
         <div className="relative p-4 w-full max-w-2xl max-h-full">
           <div className="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">
             <div className="flex justify-between items-center pb-4 mb-4 rounded-t border-b sm:mb-5 dark:border-gray-600">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Add Product
+                Add Post
               </h3>
               <button
+                onClick={() => setModalOpen(false)}
                 type="button"
                 className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                data-modal-target="createProductModal"
-                data-modal-toggle="createProductModal"
               >
                 <svg
                   aria-hidden="true"
@@ -579,76 +515,32 @@ const DashboardPage = async () => {
                     clip-rule="evenodd"
                   />
                 </svg>
-                <span className="sr-only">Close modal</span>
               </button>
             </div>
-            <form action="#">
-              <div className="grid gap-4 mb-4 sm:grid-cols-2">
-                <div>
+            <form
+              onSubmit={(e) => {
+                // clearErrors();
+                onSubmit(e);
+              }}
+            >
+              <div className="grid gap-4 mb-4">
+                <div className="sm:col-span-2">
                   <label
                     htmlFor="name"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >
-                    Name
+                    Post name
                   </label>
                   <input
                     type="text"
-                    name="name"
                     id="name"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Type product name"
                     required={false}
+                    {...register("title", {
+                      required: "Vui lòng nhập tiêu đề",
+                    })}
                   />
-                </div>
-                <div>
-                  <label
-                    htmlFor="brand"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Brand
-                  </label>
-                  <input
-                    type="text"
-                    name="brand"
-                    id="brand"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Product brand"
-                    required={false}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="price"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Price
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    id="price"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="$2999"
-                    required={false}
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="category"
-                    className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Category
-                  </label>
-                  <select
-                    id="category"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                  >
-                    <option selected={false}>Select category</option>
-                    <option value="TV">TV/Monitors</option>
-                    <option value="PC">PC</option>
-                    <option value="GA">Gaming/Console</option>
-                    <option value="PH">Phones</option>
-                  </select>
                 </div>
                 <div className="sm:col-span-2">
                   <label
@@ -662,6 +554,7 @@ const DashboardPage = async () => {
                     rows={4}
                     className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="Write product description here"
+                    {...register("description")}
                   ></textarea>
                 </div>
               </div>
@@ -681,12 +574,13 @@ const DashboardPage = async () => {
                     clip-rule="evenodd"
                   />
                 </svg>
-                Add new product
+                Add new post
               </button>
             </form>
           </div>
         </div>
-      </div> */}
+      </Modal>
+
       <div
         id="updateProductModal"
         aria-hidden="true"
