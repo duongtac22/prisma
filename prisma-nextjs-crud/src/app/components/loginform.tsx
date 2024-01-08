@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 const LoginForm = () => {
   const {
@@ -10,13 +11,19 @@ const LoginForm = () => {
     formState: { errors },
     handleSubmit,
   } = useForm();
+  const router = useRouter();
   const onSubmit = handleSubmit(async (credentials: any) => {
     const signInData = await signIn("credentials", {
       redirect: false,
       email: credentials.email,
       password: credentials.password,
     });
-    console.log(signInData, "signInData");
+    // console.log(signInData, "signInData");
+    if (signInData?.error) {
+      console.log(signInData.error, "signInData.error");
+    } else {
+      router.push("/admin/dashboard");
+    }
   });
   return (
     <form

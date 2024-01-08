@@ -2,10 +2,14 @@
 import PostList from "@/app/components/PostList";
 import Modal from "@/app/components/modal";
 import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 const DashboardPage = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const [post, setPost] = useState(null);
   const [inputSearch, setInputSearch] = useState("");
@@ -63,12 +67,14 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchPost();
   }, []);
-
+  if (status !== "authenticated") {
+    router.push("/login");
+  }
   if (isLoading) return <p>Loading...</p>;
   if (!post) return <p>No post</p>;
   return (
     <>
-      <section className="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 antialiased my-10">
+      <section className="bg-gray-50 dark:bg-gray-900 p-3 sm:p-5 antialiased mb-10">
         <div className="mx-auto max-w-screen-xl px-4 lg:px-12">
           <div className="bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
             <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4">
