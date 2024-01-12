@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const Post = require("../models/post");
+const post = require("../models/post");
 
 router.get("/getAll", async (req, res) => {
   try {
-    const data = await Post.find();
+    const data = await post.find();
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
