@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const post = require("../models/post");
 
-router.get("/getAll", async (req, res) => {
+router.get("/post", async (req, res) => {
   try {
     const data = await post.find();
     res.json(data);

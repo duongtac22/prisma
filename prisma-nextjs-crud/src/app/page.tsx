@@ -1,8 +1,6 @@
 import PostList from "./components/PostList";
 async function getData() {
-  const res = await fetch("http://localhost:3000/api/posts");
-  // The return value is *not* serialized
-  // You can return Date, Map, Set, etc.
+  const res = await fetch("http://localhost:8080/api/post");
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary
